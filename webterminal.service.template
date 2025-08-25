@@ -1,0 +1,16 @@
+[Unit]
+Description=Web Terminal Server
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/web_terminal_vibe_coding
+ExecStart=/path/to/web_terminal_vibe_coding/start-terminal-server.sh
+Restart=always
+RestartSec=3
+StandardOutput=append:/var/log/webterminal.log
+StandardError=append:/var/log/webterminal-error.log
+
+[Install]
+WantedBy=multi-user.target

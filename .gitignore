@@ -1,0 +1,89 @@
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+
+# System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Personal/sensitive files
+*.pem
+*.key
+*.crt
+*.env
+.env.local
+config.local.js
+secrets/
+
+# Backup files
+*.bak
+*.backup
+*-backup.html
+*-old.html
+
+# Test files
+test-*.html
+*.test.js
+
+# ttyd binary (if stored locally)
+ttyd
+
+# Code-server config
+.config/code-server/
+
+# Session data
+sessions/
+.sessions/
+
+# Custom exclusions
+terminal.log
+terminal-error.log
+nginx-proxy.conf
+nginx-troubleshoot.sh
+install-service.sh
+test-service.sh
+index-direct.html
+index-proxy-broken.html
+vscode-proxy.html
+test-whisper-integration.html
+WHISPER_INTEGRATION.md
+SERVICE_DOCUMENTATION.md
+SECURITY.md
+
+# Keep service template
+!webterminal.service.template

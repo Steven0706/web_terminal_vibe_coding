@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Development Environment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .tab {
+            padding: 8px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .tab.active {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 -2px 10px rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-icon {
+            font-size: 16px;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #00ff00;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .content {
+            flex: 1;
+            position: relative;
+            background: #1e1e1e;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tab-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            position: relative;
+        }
+        
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #1e1e1e;
+            flex: 1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* Voice Recording Button */
+        .voice-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+            border: none;
+        }
+        
+        .voice-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        }
+        
+        .voice-button.recording {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: recording-pulse 1.5s infinite;
+        }
+        
+        @keyframes recording-pulse {
+            0% { box-shadow: 0 4px 20px rgba(245, 87, 108, 0.4); }
+            50% { box-shadow: 0 4px 40px rgba(245, 87, 108, 0.8); }
+            100% { box-shadow: 0 4px 20px rgba(245, 87, 108, 0.4); }
+        }
+        
+        .voice-button svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Transcription Toast */
+        .toast {
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s;
+            max-width: 300px;
+            z-index: 999;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-header {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toast-body {
+            font-size: 14px;
+            line-height: 1.4;
+            margin-top: 8px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            word-break: break-word;
+        }
+        
+        textarea.toast-body {
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            resize: vertical;
+            font-family: inherit;
+            min-height: 60px;
+            max-height: 150px;
+        }
+        
+        textarea.toast-body:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.4);
+        }
+        
+        .copy-button {
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: opacity 0.3s;
+        }
+        
+        .copy-button:hover {
+            opacity: 0.9;
+        }
+        
+        /* Loading indicator */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            display: none;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        /* Settings Panel */
+        .settings-button {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .settings-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .settings-panel {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 200;
+            min-width: 300px;
+        }
+        
+        .settings-panel.show {
+            display: block;
+        }
+        
+        .settings-panel h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .settings-group {
+            margin-bottom: 15px;
+        }
+        
+        .settings-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .settings-group input {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .settings-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <span>🚀</span>
+            Web Development Environment
+        </h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('terminal')">
+                <span class="tab-icon">⌨️</span>
+                Terminal
+            </button>
+            <button class="tab" onclick="switchTab('vscode')">
+                <span class="tab-icon">📝</span>
+                VS Code
+            </button>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="status">
+                <div class="status-indicator"></div>
+                <span id="status-text">Connected</span>
+            </div>
+            <button class="settings-button" onclick="toggleSettings()">⚙️ Settings</button>
+            <button class="settings-button" onclick="logout()" style="background: rgba(244, 67, 54, 0.2); border-color: rgba(244, 67, 54, 0.3);">🚪 Logout</button>
+        </div>
+    </div>
+    
+    <div class="content">
+        <div id="terminal-tab" class="tab-content active">
+            <iframe id="terminal-frame" src=""></iframe>
+        </div>
+        <div id="vscode-tab" class="tab-content">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; color: white;">
+                <h2 style="margin-bottom: 20px;">🚀 VS Code Server</h2>
+                <p style="margin-bottom: 30px; opacity: 0.8; max-width: 500px; text-align: center;">
+                    VS Code Server is running on port 10001. For the best experience, open it in a separate tab.
+                </p>
+                <button id="vscodeButton" onclick="window.open(config.vscodeUrl, '_blank')" style="
+                    padding: 14px 32px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 18px;
+                    cursor: pointer;
+                    font-weight: 500;
+                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                    transition: all 0.3s;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    Open VS Code →
+                </button>
+                <div style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px; max-width: 500px;">
+                    <p style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">
+                        <strong>Direct Access:</strong>
+                    </p>
+                    <code id="vscodeUrl" style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px; display: block; font-size: 13px;">
+                        <!-- URL will be set dynamically -->
+                    </code>
+                    <p style="font-size: 12px; opacity: 0.6; margin-top: 15px; line-height: 1.5;">
+                        💡 Tip: You can bookmark the VS Code URL for quick access
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Voice Recording Button -->
+    <button class="voice-button" id="voiceButton" onclick="toggleRecording()">
+        <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+    </button>
+    
+    <!-- Transcription Toast -->
+    <div class="toast" id="transcriptionToast">
+        <div class="toast-header">
+            <span>🎤</span>
+            <span>Transcription</span>
+        </div>
+        <textarea class="toast-body" id="transcriptionText"></textarea>
+        <button class="copy-button" onclick="copyTranscription()">📋 Copy to Clipboard</button>
+    </div>
+    
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <h3>Whisper API Settings</h3>
+        <div class="settings-group">
+            <label>API Endpoint</label>
+            <input type="text" id="whisperEndpoint" placeholder="https://whisper.yourdomain.com/api/transcribe" value="https://whisper.yourdomain.com/api/transcribe">
+        </div>
+        <div class="settings-group">
+            <label>Language (optional)</label>
+            <select id="whisperLanguage" style="width: 100%; padding: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; border-radius: 4px; font-size: 14px;">
+                <option value="">Auto-detect</option>
+                <option value="en">English</option>
+                <option value="zh">Chinese</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="ru">Russian</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+                <option value="pt">Portuguese</option>
+                <option value="it">Italian</option>
+            </select>
+        </div>
+        <button class="copy-button" onclick="saveSettings()">Save Settings</button>
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.2); font-size: 11px; opacity: 0.7;">
+            <p>Whisper API Status: <span id="whisperStatus" style="color: #00ff00;">Checking...</span></p>
+            <p style="margin-top: 5px;">Rate Limit: 30 requests/minute</p>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">Loading...</div>
+    
+    <script>
+        // Authentication check
+        (function checkAuth() {
+            const authToken = localStorage.getItem('webTerminalAuth');
+            const authExpiry = localStorage.getItem('webTerminalAuthExpiry');
+            
+            if (!authToken || !authExpiry) {
+                // No auth, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const now = new Date().getTime();
+            if (now >= parseInt(authExpiry)) {
+                // Auth expired, clear and redirect
+                localStorage.removeItem('webTerminalAuth');
+                localStorage.removeItem('webTerminalAuthExpiry');
+                window.location.href = 'login.html';
+                return;
+            }
+        })();
+        
+        // Configuration
+        const config = {
+            // Use HTTPS terminal URL if we're on HTTPS, otherwise use direct IP
+            terminalUrl: window.location.protocol === 'https:' 
+                ? 'https://terminal.yourdomain.com' 
+                : 'http://localhost:7681',  // Use localhost for local access
+            vscodeUrl: window.location.protocol === 'https:'
+                ? 'https://vscode.yourdomain.com'
+                : 'http://localhost:10001',  // Use localhost for local access
+            // Use HTTPS whisper API if on HTTPS
+            whisperEndpoint: window.location.protocol === 'https:'
+                ? 'https://whisper.yourdomain.com/api/transcribe'
+                : (localStorage.getItem('whisperEndpoint') || 'http://localhost:5000/api/transcribe')
+        };
+        
+        // Initialize
+        window.onload = function() {
+            console.log('Protocol:', window.location.protocol);
+            console.log('Terminal URL:', config.terminalUrl);
+            console.log('VS Code URL:', config.vscodeUrl);
+            console.log('Whisper URL:', config.whisperEndpoint);
+            
+            // Set terminal iframe source
+            document.getElementById('terminal-frame').src = config.terminalUrl;
+            
+            // Update VS Code URL display
+            const vscodeUrlElement = document.getElementById('vscodeUrl');
+            if (vscodeUrlElement) {
+                vscodeUrlElement.textContent = config.vscodeUrl;
+            }
+            
+            // Load settings
+            const savedEndpoint = localStorage.getItem('whisperEndpoint') || 'https://whisper.yourdomain.com/api/transcribe';
+            const savedLanguage = localStorage.getItem('whisperLanguage') || '';
+            document.getElementById('whisperEndpoint').value = savedEndpoint;
+            document.getElementById('whisperLanguage').value = savedLanguage;
+            
+            // Check Whisper API status
+            checkWhisperStatus();
+        };
+        
+        // Check Whisper API status
+        async function checkWhisperStatus() {
+            try {
+                // Use HTTPS URL if on HTTPS
+                const statusUrl = window.location.protocol === 'https:'
+                    ? 'https://whisper.yourdomain.com/api/status'
+                    : 'http://localhost:5000/api/status';
+                    
+                const response = await fetch(statusUrl);
+                if (response.ok) {
+                    const data = await response.json();
+                    const statusEl = document.getElementById('whisperStatus');
+                    statusEl.textContent = `Online (${data.model} model, ${data.device})`;
+                    statusEl.style.color = '#00ff00';
+                } else {
+                    throw new Error('API not responding');
+                }
+            } catch (error) {
+                const statusEl = document.getElementById('whisperStatus');
+                statusEl.textContent = 'Offline';
+                statusEl.style.color = '#ff4444';
+            }
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.tab').classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tabName === 'terminal') {
+                document.getElementById('terminal-tab').classList.add('active');
+            } else if (tabName === 'vscode') {
+                document.getElementById('vscode-tab').classList.add('active');
+                // VS Code tab shows a launcher button (doesn't use iframe due to security)
+            }
+        }
+        
+        // Voice Recording
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        
+        async function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+        
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    await sendToWhisper(audioBlob);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Update UI
+                document.getElementById('voiceButton').classList.add('recording');
+                document.getElementById('micIcon').innerHTML = `
+                    <rect x="9" y="9" width="6" height="6" rx="1"/>
+                `;
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                alert('Could not access microphone. Please check permissions.');
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                isRecording = false;
+                
+                // Update UI
+                document.getElementById('voiceButton').classList.remove('recording');
+                document.getElementById('micIcon').innerHTML = `
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                `;
+            }
+        }
+        
+        async function sendToWhisper(audioBlob) {
+            // Use config endpoint which already handles HTTPS
+            const endpoint = config.whisperEndpoint;
+            
+            try {
+                // Show loading
+                document.getElementById('status-text').textContent = 'Transcribing...';
+                
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                formData.append('task', 'transcribe');
+                
+                // Add language if specified
+                const language = localStorage.getItem('whisperLanguage') || '';
+                if (language) {
+                    formData.append('language', language);
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const transcription = data.text || '';
+                    const language = data.language || 'unknown';
+                    const processingTime = data.processing_time || '';
+                    
+                    // Show transcription with metadata
+                    showTranscription(transcription, language, processingTime);
+                } else {
+                    throw new Error('Transcription failed');
+                }
+                
+                // Update status
+                document.getElementById('status-text').textContent = 'Connected';
+            } catch (error) {
+                console.error('Error sending to Whisper:', error);
+                if (error.message.includes('Rate limit')) {
+                    alert('Rate limit exceeded. Please wait a moment and try again.');
+                } else if (error.message.includes('File too large')) {
+                    alert('Recording is too large. Please record a shorter audio clip.');
+                } else {
+                    alert(`Error transcribing audio: ${error.message}`);
+                }
+                document.getElementById('status-text').textContent = 'Connected';
+            }
+        }
+        
+        function showTranscription(text, language = '', processingTime = '') {
+            const toast = document.getElementById('transcriptionToast');
+            const textElement = document.getElementById('transcriptionText');
+            const headerElement = toast.querySelector('.toast-header');
+            
+            // Store the transcription in localStorage for the paste button
+            localStorage.setItem('lastTranscription', text);
+            localStorage.setItem('lastTranscriptionTime', new Date().toISOString());
+            console.log('Stored transcription in localStorage for paste button');
+            
+            // Update header with metadata
+            let headerContent = '<span>🎤</span><span>Transcription</span>';
+            if (language || processingTime) {
+                headerContent += '<span style="font-size: 11px; opacity: 0.8; margin-left: auto;">';
+                if (language) headerContent += `[${language}]`;
+                if (processingTime) headerContent += ` ${processingTime}`;
+                headerContent += '</span>';
+            }
+            headerElement.innerHTML = headerContent;
+            
+            textElement.value = text;  // Changed from textContent to value for textarea
+            toast.classList.add('show');
+            
+            // Auto-copy to clipboard immediately
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Transcription auto-copied to clipboard');
+                // Show brief notification
+                const button = toast.querySelector('button');
+                if (button) {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Auto-copied!';
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Failed to auto-copy text: ', err);
+            });
+            
+            // Auto-hide after 15 seconds for longer texts
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 15000);
+        }
+        
+        function copyTranscription() {
+            const textElement = document.getElementById('transcriptionText');
+            const text = textElement.value;  // Changed from textContent to value for textarea
+            navigator.clipboard.writeText(text).then(() => {
+                // Briefly change button text
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+        
+        // Settings
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('show');
+        }
+        
+        // Helper function to show notifications
+        function showNotification(message, type = 'info') {
+            // Create a simple toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 200px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2196F3'};
+                color: white;
+                padding: 12px 24px;
+                border-radius: 4px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 10000;
+                font-size: 14px;
+                animation: slideUp 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideDown 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('webTerminalAuth');
+                localStorage.removeItem('webTerminalAuthExpiry');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        function saveSettings() {
+            const endpoint = document.getElementById('whisperEndpoint').value;
+            const language = document.getElementById('whisperLanguage').value;
+            
+            localStorage.setItem('whisperEndpoint', endpoint);
+            localStorage.setItem('whisperLanguage', language);
+            
+            config.whisperEndpoint = endpoint;
+            
+            // Check API status after saving
+            checkWhisperStatus();
+            
+            alert('Settings saved!');
+            document.getElementById('settingsPanel').classList.remove('show');
+        }
+        
+        // Close settings when clicking outside
+        document.addEventListener('click', (e) => {
+            const settingsPanel = document.getElementById('settingsPanel');
+            const settingsButton = document.querySelector('.settings-button');
+            
+            if (!settingsPanel.contains(e.target) && e.target !== settingsButton) {
+                settingsPanel.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
