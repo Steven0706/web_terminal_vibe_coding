@@ -1,4 +1,4 @@
-# 🚀 Web Terminal - Browser-Based Development Environment
+# 🚀 Web Terminal - Browser-Based Development Environment for vibe coding
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/Platform-Linux-blue)](https://www.linux.org/)
@@ -8,6 +8,7 @@
 A comprehensive web-based development environment that brings terminal access, VS Code IDE, and voice transcription capabilities to your browser. Perfect for remote development, teaching, or accessing your development environment from any device.
 
 ![Web Terminal Interface](https://via.placeholder.com/800x400/667eea/ffffff?text=Web+Terminal+Interface)
+<img width="1436" height="920" alt="image" src="https://github.com/user-attachments/assets/e88b0190-84cf-4434-a4c4-8687bd74bc97" />
 
 ## ✨ Features
 
